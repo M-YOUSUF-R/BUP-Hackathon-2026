@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GridWise — BUP CSE Fest 2026</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --panel: #1e293b;
+    --panel-2: #273449;
+    --border: #334155;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --accent: #38bdf8;
+    --good: #22c55e;
+    --warn: #f59e0b;
+    --bad: #ef4444;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                 Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.45;
+  }
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel);
+  }
+  header h1 { font-size: 16px; margin: 0; font-weight: 600; letter-spacing: .2px; }
+  header .sub { color: var(--muted); font-size: 12px; margin-left: 8px; font-weight: 400; }
+  .status {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--muted);
+  }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--muted); display: inline-block;
+  }
+  .dot.ok  { background: var(--good); }
+  .dot.bad { background: var(--bad); }
+  .dot.unk { background: var(--warn); }
+
+  main {
+    display: grid;
+    grid-template-columns: minmax(360px, 480px) 1fr;
+    gap: 16px;
+    padding: 16px 20px 40px;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+  @media (max-width: 1000px) {
+    main { grid-template-columns: 1fr; }
+  }
+
+  section {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+  }
+  section h2 {
+    font-size: 13px; margin: 0 0 10px; font-weight: 600;
+    letter-spacing: .5px; text-transform: uppercase; color: var(--muted);
+  }
+
+  .controls {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    margin-bottom: 10px;
+  }
+  select, button, textarea, input[type=file] {
+    font: inherit; color: inherit;
+  }
+  select, button {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+  }
+  button:hover { border-color: var(--accent); }
+  button.primary { background: var(--accent); color: #082f49; border-color: var(--accent); font-weight: 600; }
+  button.primary:disabled { opacity: .5; cursor: not-allowed; }
+  button.ghost { background: transparent; }
+
+  textarea {
+    width: 100%;
+    min-height: 480px;
+    background: #0b1220;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-family: ui-monospace, "Cascadia Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 12.5px;
+    line-height: 1.5;
+    resize: vertical;
+  }
+  textarea:focus { outline: 1px solid var(--accent); border-color: var(--accent); }
+
+  .stats {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 8px; margin-bottom: 12px;
+  }
+  .stat {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .stat .label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .4px; }
+  .stat .val { font-size: 18px; font-weight: 600; margin-top: 2px; }
+  .stat .unit { font-size: 11px; color: var(--muted); margin-left: 3px; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+  }
+  th, td {
+    text-align: left;
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  th {
+    color: var(--muted); font-weight: 600; font-size: 11px;
+    text-transform: uppercase; letter-spacing: .3px;
+    position: sticky; top: 0; background: var(--panel); z-index: 1;
+  }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; font-family: ui-monospace, monospace; }
+
+  .tag {
+    display: inline-block; padding: 1px 7px; border-radius: 999px;
+    font-size: 11px; font-weight: 600; letter-spacing: .2px;
+  }
+  .tag.applies { background: #052e16; color: var(--good); }
+  .tag.noop    { background: #1f2937; color: var(--muted); }
+  .tag.charge    { background: #052e16; color: var(--good); }
+  .tag.discharge { background: #3b1d0a; color: var(--warn); }
+  .tag.idle      { background: #1f2937; color: var(--muted); }
+
+  .scroll { max-height: 460px; overflow: auto; border: 1px solid var(--border); border-radius: 8px; }
+
+  .summary {
+    background: var(--panel-2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 12px; margin-top: 10px;
+    color: var(--muted); font-size: 13px;
+  }
+
+  .empty {
+    color: var(--muted); font-style: italic;
+    padding: 20px; text-align: center;
+  }
+
+  .err {
+    background: #450a0a; border: 1px solid #7f1d1d; color: #fecaca;
+    border-radius: 8px; padding: 10px 12px; margin-bottom: 12px;
+    font-family: ui-monospace, monospace; font-size: 12px;
+    white-space: pre-wrap;
+  }
+
+  .hint { color: var(--muted); font-size: 11.5px; margin-top: 4px; }
+
+  .pill {
+    display: inline-block; padding: 1px 6px; margin-right: 4px;
+    border-radius: 4px; background: var(--panel-2);
+    font-family: ui-monospace, monospace; font-size: 11px;
+    color: var(--accent);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>GridWise <span class="sub">BUP CSE Fest 2026 · LLM-assisted energy scheduling</span></h1>
+  <div class="status"><span id="dot" class="dot unk"></span><span id="statusText">checking…</span></div>
+</header>
+
+<main>
+  <!-- LEFT: request -->
+  <section>
+    <h2>Request</h2>
+    <div class="controls">
+      <select id="sampleSelect" title="Load a public sample case">
+        <option value="">— load sample —</option>
+      </select>
+      <button id="runBtn" class="primary" title="POST to /optimize-energy">Run ▶</button>
+      <button id="fmtBtn" class="ghost" title="Pretty-print the JSON">Format</button>
+      <button id="clearBtn" class="ghost" title="Clear editor">Clear</button>
+    </div>
+    <textarea id="reqEditor" spellcheck="false" placeholder='{"scenario_id":"...","operator_notes":[...],"hours":[...],"battery":{...}}'></textarea>
+    <div class="hint">
+      Tip: pick a sample from the dropdown, or paste your own request. Endpoint:
+      <span class="pill">POST /optimize-energy</span>
+    </div>
+  </section>
+
+  <!-- RIGHT: response -->
+  <section>
+    <h2>Response</h2>
+    <div id="errBox" class="err" style="display:none"></div>
+
+    <div id="statsBox" class="stats" style="display:none">
+      <div class="stat"><div class="label">Scenario</div><div class="val" id="statScenario">—</div></div>
+      <div class="stat"><div class="label">Total cost</div><div class="val"><span id="statCost">—</span><span class="unit">BDT</span></div></div>
+      <div class="stat"><div class="label">Total grid</div><div class="val"><span id="statGrid">—</span><span class="unit">kWh</span></div></div>
+      <div class="stat"><div class="label">Peak grid</div><div class="val"><span id="statPeak">—</span><span class="unit">kWh</span></div></div>
+      <div class="stat"><div class="label">Latency</div><div class="val"><span id="statTime">—</span><span class="unit">ms</span></div></div>
+    </div>
+
+    <div id="dirBlock" style="display:none">
+      <h2 style="margin-top:6px">Directive interpretation</h2>
+      <div class="scroll">
+        <table id="dirTable">
+          <thead>
+            <tr>
+              <th>#</th><th>applies</th><th>type</th><th>hours</th>
+              <th>value</th><th>explanation</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="planBlock" style="display:none; margin-top:14px;">
+      <h2>Hourly plan</h2>
+      <div class="scroll">
+        <table id="planTable">
+          <thead>
+            <tr>
+              <th>hour</th><th>grid_kwh</th><th>solar_used_kwh</th>
+              <th>action</th><th>battery_kwh</th><th>battery_after</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="summaryBox" class="summary" style="display:none"></div>
+
+    <div id="emptyBox" class="empty">Load a sample or paste a request, then hit <strong>Run</strong>.</div>
+  </section>
+</main>
+
+<script>
+// ---------- elements ----------
+const $ = (id) => document.getElementById(id);
+const reqEditor   = $("reqEditor");
+const sampleSel   = $("sampleSelect");
+const runBtn      = $("runBtn");
+const fmtBtn      = $("fmtBtn");
+const clearBtn    = $("clearBtn");
+const dot         = $("dot");
+const statusText  = $("statusText");
+const errBox      = $("errBox");
+const statsBox    = $("statsBox");
+const dirBlock    = $("dirBlock");
+const planBlock   = $("planBlock");
+const summaryBox  = $("summaryBox");
+const emptyBox    = $("emptyBox");
+
+// ---------- helpers ----------
+const esc = (v) => String(v ?? "")
+  .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+const fmtNum = (v, digits = 2) => {
+  if (v === null || v === undefined || isNaN(v)) return "—";
+  return Number(v).toLocaleString("en-US", {
+    minimumFractionDigits: digits, maximumFractionDigits: digits,
+  });
+};
+
+const hoursStr = (h) => Array.isArray(h) ? `[${h.join(", ")}]` : "—";
+
+const adjValueStr = (type, adj) => {
+  if (!adj) return "—";
+  if (type === "solar_reduction")      return `factor = ${adj.factor}`;
+  if (type === "minimum_battery_reserve") return `${adj.minimum_energy_kwh} kWh`;
+  if (type === "max_grid_window")      return `${adj.max_grid_kwh} kWh`;
+  return "—";
+};
+
+// ---------- health ----------
+async function checkHealth() {
+  dot.className = "dot unk";
+  statusText.textContent = "checking…";
+  try {
+    const t0 = performance.now();
+    const r = await fetch("/health", { cache: "no-store" });
+    const ms = Math.round(performance.now() - t0);
+    if (r.ok) {
+      const body = await r.json();
+      if (body.status === "ok") {
+        dot.className = "dot ok";
+        statusText.textContent = `ready · ${ms} ms`;
+        return;
+      }
+    }
+    dot.className = "dot bad";
+    statusText.textContent = "unhealthy";
+  } catch {
+    dot.className = "dot bad";
+    statusText.textContent = "unreachable";
+  }
+}
+
+// ---------- samples ----------
+async function loadSampleList() {
+  try {
+    const r = await fetch("/static/samples.json", { cache: "no-store" });
+    if (!r.ok) throw new Error(String(r.status));
+    const pack = await r.json();
+    const cases = pack.cases || [];
+    for (const c of cases) {
+      const opt = document.createElement("option");
+      opt.value = c.id;
+      opt.textContent = `${c.id} — ${c.label}`;
+      sampleSel.appendChild(opt);
+    }
+    // stash case inputs for quick access
+    window.__samples = Object.fromEntries(cases.map((c) => [c.id, c.input]));
+  } catch (e) {
+    // graceful: no sample list available
+    const opt = document.createElement("option");
+    opt.disabled = true;
+    opt.textContent = "samples.json not found in /static/";
+    sampleSel.appendChild(opt);
+  }
+}
+
+sampleSel.addEventListener("change", () => {
+  const id = sampleSel.value;
+  if (!id || !window.__samples || !window.__samples[id]) return;
+  reqEditor.value = JSON.stringify(window.__samples[id], null, 2);
+});
+
+// ---------- editor helpers ----------
+fmtBtn.addEventListener("click", () => {
+  try {
+    reqEditor.value = JSON.stringify(JSON.parse(reqEditor.value), null, 2);
+  } catch (e) {
+    showError("JSON parse error: " + e.message);
+  }
+});
+
+clearBtn.addEventListener("click", () => {
+  reqEditor.value = "";
+  resetResponse();
+  sampleSel.value = "";
+});
+
+// ---------- run ----------
+runBtn.addEventListener("click", runOnce);
+
+async function runOnce() {
+  hideError();
+  resetResponse();
+
+  let payload;
+  try {
+    payload = JSON.parse(reqEditor.value);
+  } catch (e) {
+    showError("Request is not valid JSON:\n" + e.message);
+    return;
+  }
+
+  runBtn.disabled = true;
+  runBtn.textContent = "Running…";
+  const t0 = performance.now();
+
+  try {
+    const r = await fetch("/optimize-energy", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const ms = Math.round(performance.now() - t0);
+    const body = await r.json().catch(() => ({}));
+
+    if (!r.ok) {
+      showError(`HTTP ${r.status}\n${JSON.stringify(body, null, 2)}`);
+      return;
+    }
+    renderResponse(body, ms);
+  } catch (e) {
+    showError("Network error: " + e.message);
+  } finally {
+    runBtn.disabled = false;
+    runBtn.textContent = "Run ▶";
+  }
+}
+
+// ---------- rendering ----------
+function resetResponse() {
+  emptyBox.style.display = "";
+  statsBox.style.display = "none";
+  dirBlock.style.display = "none";
+  planBlock.style.display = "none";
+  summaryBox.style.display = "none";
+  $("dirTable").querySelector("tbody").innerHTML = "";
+  $("planTable").querySelector("tbody").innerHTML = "";
+}
+
+function renderResponse(resp, ms) {
+  emptyBox.style.display = "none";
+  statsBox.style.display = "";
+  dirBlock.style.display = "";
+  planBlock.style.display = "";
+  summaryBox.style.display = "";
+
+  $("statScenario").textContent = resp.scenario_id ?? "—";
+  $("statCost").textContent     = fmtNum(resp.total_cost_bdt, 2);
+  $("statGrid").textContent     = fmtNum(resp.total_grid_kwh, 2);
+  $("statPeak").textContent     = fmtNum(resp.peak_grid_kwh, 2);
+  $("statTime").textContent     = ms;
+
+  // directives
+  const dBody = $("dirTable").querySelector("tbody");
+  dBody.innerHTML = "";
+  for (const d of resp.directive_interpretation || []) {
+    const tr = document.createElement("tr");
+    const appliesTag = d.applies
+      ? `<span class="tag applies">true</span>`
+      : `<span class="tag noop">false</span>`;
+    tr.innerHTML = `
+      <td class="num">${esc(d.note_index)}</td>
+      <td>${appliesTag}</td>
+      <td>${esc(d.directive_type)}</td>
+      <td>${esc(hoursStr(d.structured_adjustment?.hours))}</td>
+      <td>${esc(adjValueStr(d.directive_type, d.structured_adjustment))}</td>
+      <td>${esc(d.explanation || "")}</td>
+    `;
+    dBody.appendChild(tr);
+  }
+
+  // plan
+  const pBody = $("planTable").querySelector("tbody");
+  pBody.innerHTML = "";
+  for (const p of resp.hourly_plan || []) {
+    const tr = document.createElement("tr");
+    const action = p.battery_action || "idle";
+    tr.innerHTML = `
+      <td class="num">${esc(p.hour)}</td>
+      <td class="num">${fmtNum(p.grid_kwh, 2)}</td>
+      <td class="num">${fmtNum(p.solar_used_kwh, 2)}</td>
+      <td><span class="tag ${esc(action)}">${esc(action)}</span></td>
+      <td class="num">${fmtNum(p.battery_kwh, 2)}</td>
+      <td class="num">${fmtNum(p.battery_energy_after_kwh, 2)}</td>
+    `;
+    pBody.appendChild(tr);
+  }
+
+  // summary
+  summaryBox.textContent = resp.plan_summary || "";
+
+  // simple self-check against the request's own numbers
+  selfCheck(resp);
+}
+
+function selfCheck(resp) {
+  const plan = resp.hourly_plan || [];
+  const recalcGrid = plan.reduce((s, p) => s + (p.grid_kwh || 0), 0);
+  const recalcPeak = plan.reduce((m, p) => Math.max(m, p.grid_kwh || 0), 0);
+  const drift = Math.abs(recalcGrid - (resp.total_grid_kwh || 0));
+
+  if (drift > 0.05) {
+    showError(
+      `Self-check warning: total_grid_kwh (${resp.total_grid_kwh}) ` +
+      `does not match recalculation (${recalcGrid.toFixed(4)}).`
+    );
+  } else if (Math.abs(recalcPeak - (resp.peak_grid_kwh || 0)) > 0.05) {
+    showError(
+      `Self-check warning: peak_grid_kwh (${resp.peak_grid_kwh}) ` +
+      `does not match recalculation (${recalcPeak.toFixed(4)}).`
+    );
+  }
+}
+
+// ---------- error display ----------
+function showError(msg) {
+  errBox.textContent = msg;
+  errBox.style.display = "";
+}
+function hideError() {
+  errBox.textContent = "";
+  errBox.style.display = "none";
+}
+
+// ---------- boot ----------
+(async function boot() {
+  await checkHealth();
+  await loadSampleList();
+  setInterval(checkHealth, 15000); // soft health polling
+})();
+</script>
+</body>
+</html>

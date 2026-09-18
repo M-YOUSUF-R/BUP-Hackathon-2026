@@ -1,0 +1,16 @@
+gridwise/
+├── app/
+│   ├── __init__.py
+│   ├── schemas.py         # Pydantic request/response models
+│   ├── interpreter.py     # LangChain + LLM structured output
+│   ├── guardrails.py      # deterministic validator
+│   ├── optimizer.py       # PuLP LP solver
+│   ├── replay.py          # independent schedule checker
+│   └── main.py            # FastAPI app
+├── tests/
+│   └── test_samples.py    # replays public cases
+├── requirements.txt
+├── Dockerfile
+├── .env.example
+├── .gitignore
+└── README.md

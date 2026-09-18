@@ -1,0 +1,21 @@
+┌─────────────────────────────────────────────────────────────────┐
+│  FastAPI service  (binds 0.0.0.0:8000)                          │
+│                                                                 │
+│  GET  /health          → {"status":"ok"}                        │
+│  POST /optimize-energy → full pipeline below                    │
+│                                                                 │
+│   request JSON                                                  │
+│       │                                                         │
+│       ▼                                                         │
+│  ┌──────────────┐   ┌──────────────────┐   ┌────────────────┐   │
+│  │ LLM          │   │ Guardrail        │   │ Optimizer      │   │
+│  │ interpreter  │──▶│ validator        │──▶│ (LP, PuLP)    │   │
+│  │ (LangChain)  │   │ (pure Python)    │   │                │   │
+│  └──────────────┘   └──────────────────┘   └────────────────┘   │
+│       │                     │                     │             │
+│       │ raw directives      │ clean directives    │ hourly_plan │
+│       ▼                     ▼                     ▼             │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │ Response assembler  → totals, peak, plan_summary         │   │
+│  └──────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
