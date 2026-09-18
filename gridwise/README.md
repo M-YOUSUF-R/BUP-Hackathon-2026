@@ -1,6 +1,7 @@
 # GridWise
 
 GridWise is a FastAPI service for optimizing battery and grid scheduling from operator notes. It interprets natural-language directives, validates them with deterministic guardrails, and solves a linear optimization model to recommend a feasible hourly energy plan.
+# Fontend Code: https://github.com/bye-shuvo/gridwisebd/
 
 ## Deployment
 
