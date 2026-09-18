@@ -1,7 +1,4 @@
 # app/main.py
-import os
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
 import logging
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
@@ -18,13 +15,7 @@ logger = logging.getLogger("gridwise")
 
 app = FastAPI(title="GridWise", version="1.0.0")
 
-STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
 
-@app.get("/", include_in_schema=False)
-def ui_index() -> FileResponse:
-    return FileResponse(os.path.join(STATIC_DIR, "index.html"))
-
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 @app.get("/health", response_model=HealthResponse)
 def health() -> HealthResponse:
     return HealthResponse(status="ok")
