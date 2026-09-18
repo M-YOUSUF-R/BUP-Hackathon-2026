@@ -4,7 +4,7 @@ GridWise is a FastAPI service for optimizing battery and grid scheduling from op
 
 ## Deployment
 
-Live deployment: https://bup-hackathon-2026.onrender.com
+Live deployment: [https://gridwisebd.vercel.app/](https://gridwisebd.vercel.app/)
 
 ## Overview
 
