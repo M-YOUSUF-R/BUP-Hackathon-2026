@@ -2,6 +2,10 @@
 
 GridWise is a FastAPI service for optimizing battery and grid scheduling from operator notes. It interprets natural-language directives, validates them with deterministic guardrails, and solves a linear optimization model to recommend a feasible hourly energy plan.
 
+## Deployment
+
+Live deployment: https://bup-hackathon-2026.onrender.com
+
 ## Overview
 
 The application is designed for the BUP CSE Fest 2026 GridWise challenge. It combines:
