@@ -108,6 +108,16 @@ class OptimizeResponse(BaseModel):
     peak_grid_kwh: float
     plan_summary: str
 
+class LLMHealthInfo(BaseModel):
+    ok: bool
+    provider: str
+    model: str
+    latency_ms: Optional[int] = None
+    error_type: Optional[str] = None
+    message: str = ""
+    cached: bool = False
+
 
 class HealthResponse(BaseModel):
     status: Literal["ok"] = "ok"
+    llm: Optional[LLMHealthInfo] = None
